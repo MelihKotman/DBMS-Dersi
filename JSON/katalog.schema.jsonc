@@ -1,0 +1,79 @@
+{
+  // 1. ŞEMA DEKLARASYONU
+  // Bu satır, dosyanın normal bir JSON verisi değil, bir "Kurallar Kitabı" (Schema) olduğunu belirtir.
+  // XSD'deki <?xml version="1.0"?> bildirimine benzer.
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  
+  // 2. KÖK ELEMAN TİPİ
+  // JSON'un en dışındaki yapı bir obje { } olmak zorundadır.
+  "type": "object",
+  
+  // 3. ÖZELLİKLER (PROPERTIES)
+  // Objenin içindeki anahtarları (key) ve onların kurallarını tanımlamaya başlıyoruz.
+  "properties": {
+    "katalog": {
+      "type": "object", // Katalog da kendi içinde bir objedir { }
+      "properties": {
+        
+        // --- KİTAPLAR DİZİSİ KURALLARI ---
+        "kitaplar": {
+          "type": "array", // Kitaplar bir dizi (liste) olmak zorundadır [ ]
+          "items": {       // Dizinin İÇİNDEKİ her bir eleman (item) için kurallar:
+            "type": "object", // Her eleman bir obje olmalıdır { }
+            "properties": {
+              "id": { "type": "string" },    // id kesinlikle metin olmalı
+              "yazar": { "type": "string" }, // yazar kesinlikle metin olmalı
+              "başlık": { "type": "string" },
+              "tür": { "type": "string" },
+              "fiyat": { "type": "integer" } // DİKKAT: Fiyat kesinlikle TAM SAYI olmalı! (String gelirse hata verir)
+            },
+            // ZORUNLULUK KURALLARI (REQUIRED)
+            // XML DTD'deki #REQUIRED komutunun karşılığıdır.
+            // "tür" alanı burada yok, çünkü o XML'de (?) ile opsiyonel yapılmıştı.
+            "required": [
+              "id",
+              "yazar",
+              "başlık",
+              "fiyat"
+            ]
+          }
+        },
+        
+        // --- PLAKLAR DİZİSİ KURALLARI ---
+        "plaklar": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "albüm": { "type": "string" },
+              
+              // İÇ İÇE DİZİ (Nested Array) KURALLARI
+              "şarkıcılar": {
+                "type": "array", // Şarkıcılar alanı bir dizi [ ] olmak zorunda
+                "items": [       // İçindeki elemanlar da metin (string) olmak zorunda
+                  { "type": "string" },
+                  { "type": "string" }
+                ]
+              },
+              "yılı": { "type": "integer" } // Yıl bilgisi tam sayı olmak zorunda
+            },
+            "required": [
+              "albüm",
+              "şarkıcılar",
+              "yılı"
+            ]
+          }
+        }
+      },
+      // Katalog objesinin içinde "kitaplar" ve "plaklar" bulunması zorunludur.
+      "required": [
+        "kitaplar",
+        "plaklar"
+      ]
+    }
+  },
+  // Kök objenin içinde "katalog" anahtarının bulunması zorunludur.
+  "required": [
+    "katalog"
+  ]
+}

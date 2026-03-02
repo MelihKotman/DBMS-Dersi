@@ -1,0 +1,55 @@
+{
+  // 1. KÖK OBJE (Root Object): 
+  // JSON hiyerarşisi genellikle süslü parantez {} ile bir obje olarak başlar.
+  // KURAL: Anahtarlar (keys) KESİNLİKLE çift tırnak (" ") içinde olmalıdır.
+  "katalog": {
+    
+    // 2. DİZİ (Array) KULLANIMI [ ]
+    // "kitaplar" anahtarı, içinde birden fazla kitap objesi barındıran bir "Sıralı Liste"dir.
+    "kitaplar": [
+      {
+        // 3. OBJE (Object) { } VE VERİ TİPLERİ
+        // XML'deki nitelikler (id) ve çocuk elemanlar (yazar) JSON'da ayrım gözetmeksizin aynı seviyededir.
+        "id": "bk1",              // Veri Tipi: String
+        "yazar": "J. K. Rowling",
+        "başlık": "Harry Potter",
+        "tür": "Fantastik",
+        "fiyat": 40               // Veri Tipi: Number (Çift tırnaksız yazıldığı için sayı olarak algılanır)
+      },
+      {
+        "id": "bk2",
+        // 4. ESNEKLİK (Şemasız / Schema-less Yapı)
+        // Dikkat et: Üstteki kitapta "tür" alanı vardı, bunda yok. Onun yerine "baskı" alanı var.
+        // XML'deki katı kuralların aksine, JSON'da her objeye o an istediğin yeni bir alanı ekleyebilirsin.
+        "baskı": 3,
+        "yazar": "Miguel de Cervantes",
+        "başlık": "Don Kişot",
+        "fiyat": 50
+      } 
+      // KURAL: Son elemandan sonra VİRGÜL (,) KONMAZ. (JSON'da en sık yapılan sentaks hatasıdır).
+    ],
+    
+    "plaklar": [
+      {
+        "albüm": "Love for Sale",
+        
+        // 5. İÇ İÇE DİZİ (Nested Array)
+        // XML DTD kodunda "sarkici+" demiştik (En az 1 veya daha fazla şarkıcı olabilir)[cite: 1452].
+        // JSON'da bunu modellemenin tek ve en doğru yolu, şarkıcıları bir "Dizi [ ]" içine almaktır.
+        "şarkıcılar": [
+          "Tony Bennett",
+          "Lady Gaga"
+        ],
+        "yılı": 2021
+      },
+      {
+        "albüm": "Back in Black",
+        // Tek bir şarkıcı da olsa, standart bozulmasın diye yine Dizi [ ] formatında tutulur.
+        "şarkıcılar": [
+          "AC/DC"
+        ],
+        "yılı": 1980
+      }
+    ]
+  }
+}
