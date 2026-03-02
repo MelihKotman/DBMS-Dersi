@@ -1,0 +1,29 @@
+<!-- Katalog DTD'si -->
+<!-- | işareti birbirini takip eden öğelerden herhangi birinin var olabileceğini belirtir -->
+<!-- * işareti sıfır veya daha fazla kez tekrar edebileceğini belirtir -->
+<!ELEMENT katalog (kitaplar | plaklar)*> 
+<!ELEMENT kitaplar (kitap)*>
+<!ELEMENT plaklar (plak)*>
+
+<!-- ? işareti öğenin isteğe bağlı olduğunu belirtir -->
+<!ELEMENT kitap (yazar, baslik, tur?, fiyat)>
+
+<!-- ATTLIST öğesi, bir öğenin sahip olabileceği nitelikleri tanımlar -->
+<!ATTLIST kitap
+    id CDATA #REQUIRED 
+    baski CDATA #IMPLIED> 
+<!-- id niteliği zorunludur -->
+<!-- baski niteliği isteğe bağlıdır -->
+
+<!-- #PCDATA, öğenin metin içerebileceğini belirtir -->
+<!ELEMENT yazar (#PCDATA)>
+<!ELEMENT baslik (#PCDATA)>
+<!ELEMENT tur (#PCDATA)>
+<!ELEMENT fiyat (#PCDATA)>
+
+<!-- + işareti, öğenin bir veya daha fazla kez tekrar edebileceğini belirtir -->
+<!ELEMENT plak (album, sarkici+, yili)>
+
+<!ELEMENT album (#PCDATA)>
+<!ELEMENT sarkici (#PCDATA)>
+<!ELEMENT yili (#PCDATA)>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>XML Parser</title>
+</head>
+<body>
+  <script>
+    // 1. XML STRING TANIMLAMASI
+    // Hocanın Notu: xmlStr 'den kadar string var. Bunu işlemek için String'i ağaca çevirmek gerekir.
+    const xmlStr = `
+    <katalog>
+      <kitap id="bk1">
+        <yazar>J. K. Rowling</yazar>
+        <başlık>Harry Potter</başlık>
+        <tür>Fantastik</tür>
+        <fiyat>40</fiyat>
+      </kitap>
+      <kitap id="bk2" baskı="3. baskı">
+        <yazar>Miguel de Cervantes</yazar>
+        <başlık>Don Kişot</başlık>
+        <fiyat>50</fiyat>
+      </kitap>
+    </katalog>
+    `;
+    
+    // 2. PARSER (AYRIŞTIRICI) OLUŞTURMA
+    // Hocanın Notu: DOMParser() tarayıcıda gömülü geliyor.
+    const parser = new DOMParser();
+    
+    // Hocanın Notu: parseFromString string'i ayrıştır hazırla. 
+    // Ne olacağı, neyi parse edeceği ("application/xml") belirtiliyor. doc değişkenine atanıyor.
+    const doc = parser.parseFromString(xmlStr, "application/xml");
+    
+    // 3. AĞACA VE DÜĞÜMLERE (NODES) ERİŞİM
+    // Hocanın Notu: Kök elemanına erişmek için doc.documentElement -> rootElem
+    const rootElem = doc.documentElement;
+    
+    // Hocanın Notu: rootElem.nodeName Kök ismi yani "katalog" döner.
+    console.log(`Kök eleman adı: ${rootElem.nodeName}`);
+
+    // Hocanın Notu: rootElem.children Çocuk elemanları getirir (Burada 2 çocuk var: 2 adet kitap).
+    const books = rootElem.children;
+    for (let book of books) {
+      console.log(`Kök elemanın çocuğu: ${book.nodeName}`);
+    }
+
+    // 4. NİTELİK (ATTRIBUTE) OKUMA VE DEĞİŞTİRME
+    // Hocanın Notu: 2. çocuğun (index 1) baskı niteliğini (attribute) çekiyoruz.
+    console.log(`1. kitabın baskısı: ${rootElem.children[1].attributes["baskı"].value}`);
+
+    // Hocanın Notu: Nitelik eklenebilir. 1. çocuğa (index 0) yeni bir nitelik ekliyoruz.
+    rootElem.children[0].setAttribute("yeni-attribute", "hello-world");
+
+    // 5. SERIALIZER (GERİ DÖNÜŞTÜRÜCÜ) İŞLEMİ
+    // Hocanın Notu: XMLSerializer() nesneleri saklamak için kullanılır (Tersi deserialization).
+    const serializer = new XMLSerializer();
+    
+    console.log("XML'in güncellenmiş hali:");
+    // Hocanın Notu: String olarak serialize eder. Yapılan değişiklikler (eklenen yeni attribute) burada görülür.
+    console.log(serializer.serializeToString(doc));
+  </script>
+</body>
+</html>
