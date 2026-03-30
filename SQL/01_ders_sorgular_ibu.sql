@@ -275,7 +275,7 @@ where not exists (select *
 select o1.ogr_adi
 from ogrenciler o1
 where not exists (select * from ogrenciler o2
-				 where o2.ort > o1.ort)
+				 where o2.ort > o1.ort);
 
 -- VS (HATALI)
 select o1.ogr_adi, o1.ort
@@ -299,3 +299,66 @@ select o1.ogr_id, o1.ogr_adi, o1.lis_mev
 from ogrenciler o1
 where exists (select * from ogrenciler o2
 			 where o2.lis_mev < o1.lis_mev);
+
+/*
+************************************************
+********* FROM kısmındaki iç sorgular **********
+************************************************
+*/
+
+/*
+29. Ortalaması ile ağırlıklı ortalaması arasındaki fark 1'den büyük olan öğrenciler
+ağırlıklı ortalama = ortalama * lise mevcudu / 1000
+*/
+select ogr_id, ogr_adi, ort, lis_mev, ort * (lis_mev / 1000.0) as agirlikli_ort
+from ogrenciler
+where ort * (lis_mev / 1000.0) - ort > 1
+	or ort - ort * (lis_mev / 1000.0) > 1;
+
+select ogr_id, ogr_adi, ort, lis_mev, ort * (lis_mev / 1000.0) as agirlikli_ort
+from ogrenciler
+where abs(ort * (lis_mev / 1000.0) - ort) > 1;
+
+select * from
+(select ogr_id, ogr_adi from ogrenciler);
+
+select *
+from ogrenciler og, basvurular b
+where og.ogr_id = b.ogr_id;
+
+select *
+from (select ogr_id, ogr_adi, ort, lis_mev, ort * (lis_mev / 1000.0) as agirlikli_ort
+	  from ogrenciler) O
+where abs(O.agirlikli_ort - ort) > 1;
+
+/*
+***********************************************************
+********* WITH ile isimlendirilmiş alt query'ler **********
+***********************************************************
+*/
+
+/*
+30. WITH Sorgusu: Ortalaması ile ağırlıklı ortalaması arasındaki fark 1'den büyük olan öğrenciler
+ağırlıklı ortalama = ortalama * lise mevcudu / 1000
+CTE: Common Table Expression
+*/
+
+with aort_tablosu as (
+	select ogr_id, round((ort * (lis_mev / 1000.0))::numeric, 2) as agirlikli_ort
+	from ogrenciler
+)
+select O.ogr_id, ogr_adi, ort, lis_mev, agirlikli_ort
+from ogrenciler O, aort_tablosu Ali
+where O.ogr_id = Ali.ogr_id
+	and abs(ort - agirlikli_ort) > 1;
+
+-- Alternatif
+
+with aort_tablosu(ogr_id, agirlikli_ort) as (
+	select ogr_id, round((ort * (lis_mev / 1000.0))::numeric, 2)
+	from ogrenciler
+)
+select O.ogr_id, ogr_adi, ort, lis_mev, agirlikli_ort
+from ogrenciler O, aort_tablosu A
+where O.ogr_id = A.ogr_id
+	and abs(ort - agirlikli_ort) > 1;
