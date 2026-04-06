@@ -230,45 +230,78 @@ from (select avg(ort) as avg_ort
 	  from ogrenciler
 	 where ogr_id not in (select ogr_id from basvurular where ana_dal = 'Bilg. Müh.')) as BilDegil;
 	 
--- Her okula yapılan başvuru sayıları
+-- 33.GROUP BY Sorgusu: Her okula yapılan başvuru sayıları
+select * from basvurular order by okul_adi;
+
+-- Tek tek sayamayacağımız için GROUP BY kullanırız.
+
 select okul_adi, count(*) as basvuru_sayisi
 from basvurular
 group by okul_adi;
 
--- Şehirlere göre üniversitelerin toplam kayıt sayıları
+
+-- 34. SUM Sorgusu: Şehirlere göre üniversitelerin toplam kayıt sayıları
+select *
+from okullar
+order by sehir;
+
 select sehir, sum(kayit_sayisi)
 from okullar
 group by sehir;
 
--- Her okulun ana dallarına yapılan başvurular arasındaki en büyük ve en düşük ortalamalar
+-- 35. Her okulun ana dallarına yapılan başvurular arasındaki en büyük ve en düşük ortalamalar
+select *
+from ogrenciler inner join basvurular using(ogr_id)
+order by okul_adi, ana_dal;
+
+-- Burada öğrenciler.ogr_id fazladan ekleniyor.
+select *
+from ogrenciler inner join basvurular on ogrenciler.ogr_id = basvurular.ogr_id
+order by okul_adi, ana_dal;
+
 select okul_adi, ana_dal, max(ort), min(ort)
 from ogrenciler inner join basvurular using(ogr_id)
 group by okul_adi, ana_dal;
 
--- öğrencilerin başvuruda bulunduğu üniversite sayıları
--- bir öğrenci hiç bir başvuruda bulunmadıysa yanında 0 yazmalıdır.
+-- 36. Çğrencilerin başvuruda bulunduğu üniversite sayıları
+-- Bir öğrenci hiçbir başvuruda bulunmadıysa yanında 0 yazmalıdır.
+select *
+from ogrenciler o left outer join basvurular b  on o.ogr_id = b.ogr_id
+order by o.ogr_id;
+
+
 select o.ogr_id, count(distinct b.okul_adi) as b_u_s
 from ogrenciler o left outer join basvurular b
 	on o.ogr_id = b.ogr_id
 group by o.ogr_id
-order by o.ogr_id;
+order by o.ogr_id; -- Group ile order yeri değişmez yoksa hata alırız.
 
--- öğrencilerin başvuruda bulunduğu üniversite sayıları 
--- bir öğrenci hiç bir başvuruda bulunmadıysa yanında 0 yazmalıdır.
-select ogrenciler.ogr_id, count(distinct okul_adi)
+-- 37. Öğrencilerin başvuruda bulunduğu üniversite sayıları birden fazla (bs > 1)
+-- Left Outer Join yoksa
+select * from(
+select ogrenciler.ogr_id, count(distinct okul_adi) as bs
 from ogrenciler, basvurular
-where ogrenciler.ogr_id = basvurular.ogr_id
+where ogrenciler.ogr_id = basvurular.ogr_id -- inner join
 group by ogrenciler.ogr_id
 union
-select ogr_id, 0
+select ogr_id, 0 as bs
 from ogrenciler
-where ogr_id not in (select ogr_id from basvurular);
+where ogr_id not in (select ogr_id from basvurular))
+where bs > 1;
 
--- 3'ten daha az başvuru yapılmış üniversiteler
-select okul_adi
+-- 38. 3'ten daha az başvuru yapılmış üniversiteler
+
+-- (HATALI)
+select okul_adi, count(*) as bs
 from basvurular
 group by okul_adi
-having count(*) < 3;
+where bs < 3; -- group by sonrası kullanamayız
+
+-- (DOĞRU)
+select okul_adi, count(*) as bs
+from basvurular
+group by okul_adi
+having count(*) < 3; -- count yerine bs yazamayız.
 
 select * 
 from (select okul_adi, count(*) as basvuru_sayisi
@@ -276,7 +309,11 @@ from (select okul_adi, count(*) as basvuru_sayisi
 		group by okul_adi)
 where basvuru_sayisi < 3;
 
--- 3'ten daha az farklı öğrencinin başvuru yapmış olduğu üniversiteler
+-- 39. 3'ten daha az farklı öğrencinin başvuru yapmış olduğu üniversiteler
+select okul_adi
+from basvurular
+order by okul_adi;
+
 select okul_adi
 from basvurular
 group by okul_adi
@@ -291,29 +328,29 @@ from (
 where b_y_f_o_s < 3;
 
 /*
-***** NULL Değerler *****
+40. ***** NULL Değerler *****
 */
 
 insert into ogrenciler values
 (120, 'Adem', NULL, 900),
 (121, 'Keriman', NULL, 1500);
 
--- ort > 3.0 olan öğrenciler
+-- 41. ort > 3.0 olan öğrenciler
 select *
 from ogrenciler
 where ort > 3.0;
 
--- ort > 3.0 veya <= 3.0 olan öğrenciler
+-- 42. ort > 3.0 veya <= 3.0 olan öğrenciler
 select *
 from ogrenciler
 where ort > 3.0 or ort <= 3.0;
 
--- ort > 3.0 veya <= 3.0 olan öğrenciler veya ortalaması null olanlar
+-- 43. ort > 3.0 veya <= 3.0 olan öğrenciler veya ortalaması veya null olanlar
 select *
 from ogrenciler
-where ort > 3.0 or ort <= 3.0 or ort is null;
+where ort > 3.0 or ort <= 3.0 or ort is null; -- ort = NULL yazılabilir ancak hiçbir zaman true olmaz,
 
--- ort null olmayan öğrencilerin sayısı
+-- 44. ort null olmayan öğrencilerin sayısı
 select count(*)
 from ogrenciler
 where ort is not null;
@@ -322,52 +359,55 @@ where ort is not null;
 ***** Veri Modifikasyonu *****
 */
 
--- Veri ekleme
+-- 45. Veri ekleme
 insert into okullar values ('Selçuk', 'Konya', 30000);
 
--- Hiç bir başvuruda bulunmamış öğrenciler
+-- 46. Hiçbir başvuruda bulunmamış öğrenciler
 select *
 from ogrenciler
 where ogr_id not in (select ogr_id
 					from basvurular);
 
--- Insert için veri hazırlama
+-- 47. Insert için veri hazırlama
 select ogr_id, 'Selçuk', 'Bilg. Müh.', null
 from ogrenciler
 where ogr_id not in (select ogr_id
 					from basvurular);
 					
--- Hiç bir yere başvuruda bulunmamış öğrencileri
+-- 48. Hiçbir yere başvuruda bulunmamış öğrencileri
 -- otomatik olarak Selçuk Bilg Mühe başvurdurtma sorgusu
 insert into basvurular
 select ogr_id, 'Selçuk', 'Bilg. Müh.', null
 from ogrenciler
 where ogr_id not in (select ogr_id
 					from basvurular);
-					
--- Selçuk üniversitesi Bilg Mühe yapılan tüm başvuruları
+
+select * from basvurular;
+
+-- 49. UPDATE Sorgusu: Selçuk üniversitesi Bilg Mühe yapılan tüm başvuruları
 -- Selçuk Elk Müh'e yönlendirme ve kabul etme
 update basvurular
 set ana_dal = 'Elk. Müh.', sonuc = 'K'
 where okul_adi = 'Selçuk' and ana_dal = 'Bilg. Müh.';
 
--- Selçuk üniversitesine yapılan tüm başvuruları silme sorgusu
+-- 50. DELETE Sorgusu: Selçuk üniversitesine yapılan tüm başvuruları silme sorgusu
 delete
 from basvurular
 where okul_adi = 'Selçuk';
 
 /*
-***** Satranç Müsabakaları *****
+***** 51. Satranç Müsabakaları *****
 */
 
 create table maclar(
-	mac_id serial,
+	mac_id serial, -- Otomatik olarak PostgreSQL id'leri verir.
 	p1 integer,
 	p2 integer,
 	kazanan integer,
 	tarih date
 );
 
+-- mac_id sütunlarını girmeyeceğiz.
 insert into maclar(p1, p2, kazanan, tarih) values
 (100, 101, 100, '2024-03-15'),
 (100, 102, 100, '2024-03-15'),
@@ -384,40 +424,44 @@ insert into maclar(p1, p2, kazanan, tarih) values
 (106, 100, 100, '2024-03-18'),
 (106, 105, 105, '2024-03-18');
 
--- yeniden eskiye doğru tüm maçların listesi
+-- 52. yeniden eskiye doğru tüm maçların listesi
 select *
 from maclar
 order by tarih desc;
 
--- 17 Mart 2024 ve sonrasında yapılan maçların listesi
+-- 53. 17 Mart 2024 ve sonrasında yapılan maçların listesi
 select *
 from maclar
 where tarih >= '2024-03-17';
 
--- 16 Mart - 18 Mart arasında yapılan maçların listesi
+-- 54. BETWEEN .. AND .. Sorgusu: 16 Mart - 18 Mart arasında yapılan maçların listesi
 select *
 from maclar
 where tarih between '2024-03-16' and '2024-03-18';
 
--- tüm maçlar ve şu anki zamandan ne kadar önce yapıldıklarının listesi
+-- 55. NOW Sorgusu:. tüm maçlar ve şu anki zamandan ne kadar önce yapıldıklarının listesi
 select *, NOW() - tarih as fark
 from maclar;
 
--- tüm maçlar ve şu anki zamandan ne kadar gün önce yapıldıklarının listesi
-select *, extract(day from NOW() - tarih) as fark
+-- 56.  EXTRACT Sorgusu: tüm maçlar ve şu anki zamandan ne kadar gün önce yapıldıklarının listesi
+select *, extract(day from NOW() - tarih) as fark -- PSQL ile ilgili farklı DBMS ile farklı şeyler olabilir
 from maclar;
 
--- tüm maçlar ve şu anki zamandan ne kadar ay önce yapıldıklarının listesi
+-- 57. tüm maçlar ve şu anki zamandan ne kadar ay önce yapıldıklarının listesi
 select *, extract(month from NOW() - tarih) as fark
 from maclar;
 
--- maç kazanan oyuncuların kazandıkları maç sayılarına göre azalan sıralaması
+-- 58. maç kazanan oyuncuların kazandıkları maç sayılarına göre azalan sıralaması
+select * from maclar order by kazanan;
+
 select kazanan as oyuncu, count(*) as kazanma_sayisi
 from maclar
 group by kazanan
 order by kazanma_sayisi desc;
 
--- tüm oyuncuların kazandıkları maç sayılarına göre azalan sıralaması
+-- 59. tüm oyuncuların kazandıkları maç sayılarına göre azalan sıralaması
+select * from maclar;
+
 select kazanan as oyuncu, count(*) as kazanma_sayisi
 from maclar
 group by kazanan
@@ -431,13 +475,13 @@ from maclar
 where p2 not in (select kazanan from maclar)
 order by kazanma_sayisi desc;
 
--- tarihlere göre oynanan maç sayıları
+-- 60. tarihlere göre oynanan maç sayıları
 select tarih, count(*) as mac_sayisi
 from maclar
 group by tarih
 order by tarih;
 
--- en çok maç yapılan tarih ve o günde yapılmış maç sayısı
+-- 61. en çok maç yapılan tarih ve o günde yapılmış maç sayısı
 select tarih, count(*) as mac_sayisi
 from maclar
 group by tarih
