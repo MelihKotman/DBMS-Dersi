@@ -269,12 +269,19 @@ select *
 from ogrenciler o left outer join basvurular b  on o.ogr_id = b.ogr_id
 order by o.ogr_id;
 
-
+-- Başvuruda bulunmayanlar 0 olacaktır.
 select o.ogr_id, count(distinct b.okul_adi) as b_u_s
 from ogrenciler o left outer join basvurular b
 	on o.ogr_id = b.ogr_id
 group by o.ogr_id
 order by o.ogr_id; -- Group ile order yeri değişmez yoksa hata alırız.
+
+-- Başvuruda bulunmayanlar 1 olacaktır.
+select o.ogr_id, count(*) as b_u_s
+from ogrenciler o left outer join basvurular b
+	on o.ogr_id = b.ogr_id
+group by o.ogr_id
+order by o.ogr_id;
 
 -- 37. Öğrencilerin başvuruda bulunduğu üniversite sayıları birden fazla (bs > 1)
 -- Left Outer Join yoksa
