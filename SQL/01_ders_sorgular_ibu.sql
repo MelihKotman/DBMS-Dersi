@@ -206,7 +206,10 @@ where ogr_id in (select ogr_id
 
 /*
 21. 'Elk Müh.'e başvuran öğrencilerin adlarının listesi
-*/
+*/ -- DISTINCT olmazsa aynı öğrencinin adı birden fazla kez listelenebilir
+-- çünkü aynı öğrenci birden fazla okula başvurmuş olabilir ve
+-- her başvurusunda 'Elk. Müh.'e başvurmuş olabilir.
+-- Bu durumda 1 öğrenci için 1'den fazla kayıt oluşabilir.
 select distinct o.ogr_adi -- distinct ile silersek yanlış sonuç alabiliriz (SINAVDA 1 tane çıkabilir)
 from ogrenciler o, basvurular b
 where o.ogr_id = b.ogr_id and b.ana_dal = 'Elk. Müh.';
@@ -225,12 +228,12 @@ where ogr_id in (select ogr_id
 
 -- 23. 'Elk Müh.'e başvuran öğrencilerin ortalamaları
 select ort from ogrenciler
-where ogr_id in 
-	(select ogr_id from basvurular 
+where ogr_id in
+	(select ogr_id from basvurular
 	 where ana_dal = 'Elk. Müh.');
 
 -- VS (distinct ile düzeltilemez!)
-select ort 
+select ort
 from ogrenciler o, basvurular b 
 where o.ogr_id = b.ogr_id and b.ana_dal = 'Elk. Müh.'; 
 
@@ -250,7 +253,7 @@ select o1.okul_adi, o1.sehir
 from okullar o1
 where exists (select * 
 			 from okullar o2
-			 where o2.sehir = o1.sehir and o1.okul_adi < o2.okul_adi);
+			 where o2.sehir = o1.sehir and o1.okul_adi <> o2.okul_adi);
 
 -- VS
 
@@ -285,7 +288,7 @@ where o1.ort > o2.ort;
 -- ALL Sorgusu: Alternatif (DOĞRU)
 select ogr_adi, ort
 from ogrenciler
-where ort >= all (select ort from ogrenciler);
+where ort >= all (select max(ort) from ogrenciler);
 
 /*
 28. ANY Sorgusu: Lise mevcudu en düşük olmayan tüm öğrencilerin listesi

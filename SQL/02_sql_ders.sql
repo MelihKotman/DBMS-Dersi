@@ -43,13 +43,23 @@ where og.ogr_id = b.ogr_id and b.okul_adi = ok.okul_adi;
 /*
 6. Tüm başvuru yapan öğrencilerin ID, ad, ortalama bilgileri ve
 başvuruda bulundukları okulların adı ve kayıt sayısını döndüren sorgu (query)
-JOIN kullanarak
-HATA alırız çünkü join iki tablo arasında yapılır; biz üç tabloyu birbirine bağlamaya çalışıyoruz.
- */
-
+burada join kullanarak yapmaya çalıştık ancak join yaparken on koşulunu belirtmediğimiz için hata alırız.
+*/
 select og.ogr_id, ogr_adi, ort, b.okul_adi, kayit_sayisi
 from ogrenciler og join okullar ok join basvurular b
-on og.ogr_id = b.ogr_id and b.okul_adi = ok.okul_adi;
+on og.ogr_id = b.ogr_id and b.okul_adi = ok.okul_adi; -- on olmadığı için hata alırız;
+
+select og.ogr_id, ogr_adi, ort, b.okul_adi, kayit_sayisi
+from ogrenciler og join basvurular b on og.ogr_id = b.ogr_id join okullar ok on b.okul_adi = ok.okul_adi;
+-- on ile join yaparken hangi sütunlar üzerinden join yapacağımızı belirtmemiz gerekir, bu yüzden hata alırız;
+
+select og.ogr_id, ogr_adi, ort, b.okul_adi, kayit_sayisi
+from ogrenciler og join basvurular b using (ogr_id) join okullar ok using (okul_adi);
+-- using ile join yaparken hangi sütunlar üzerinden join yapacağımızı belirtmemiz gerekir, bu yüzden hata alırız;
+
+select og.ogr_id, ogr_adi, ort, b.okul_adi, kayit_sayisi
+from ogrenciler og natural join basvurular b natural join okullar ok;
+-- natural join yaparken hangi sütunlar üzerinden join yapacağımızı belirtmemiz gerek yoktur.
 
 /*
 7. tüm başvuru yapan öğrencilerin ID, ad, ortalama bilgileri ve
@@ -196,7 +206,7 @@ select ort
 from ogrenciler natural join basvurular
 where ana_dal = 'Bilg. Müh.'
 ORDER BY ort ASC
-LIMIT 1;
+LIMIT 1; -- fetch first 1 rows only da yazılabilir.
 
 -- 28. Bilg Müh'e başvuran öğrencilerin ortalama not ortalaması (Yanlış)
 select avg(ort)
@@ -263,20 +273,20 @@ select okul_adi, ana_dal, max(ort), min(ort)
 from ogrenciler inner join basvurular using(ogr_id)
 group by okul_adi, ana_dal;
 
--- 36. Çğrencilerin başvuruda bulunduğu üniversite sayıları
+-- 36. Öğrencilerin başvuruda bulunduğu üniversite sayıları
 -- Bir öğrenci hiçbir başvuruda bulunmadıysa yanında 0 yazmalıdır.
 select *
 from ogrenciler o left outer join basvurular b  on o.ogr_id = b.ogr_id
 order by o.ogr_id;
 
--- Başvuruda bulunmayanlar 0 olacaktır.
+-- Başvuruda bulunmayanlar 0 olacaktır. Sütuna bakar ve null varsa değeri saymaz null olduğu için 0 yazar
 select o.ogr_id, count(distinct b.okul_adi) as b_u_s
 from ogrenciler o left outer join basvurular b
 	on o.ogr_id = b.ogr_id
 group by o.ogr_id
 order by o.ogr_id; -- Group ile order yeri değişmez yoksa hata alırız.
 
--- Başvuruda bulunmayanlar 1 olacaktır.
+-- Başvuruda bulunmayanlar 1 olacaktır. direkt null olup olmadığına bakmaz satır olarak alır ve 1 yazar.
 select o.ogr_id, count(*) as b_u_s
 from ogrenciler o left outer join basvurular b
 	on o.ogr_id = b.ogr_id
