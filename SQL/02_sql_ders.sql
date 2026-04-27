@@ -209,12 +209,17 @@ ORDER BY ort ASC
 LIMIT 1; -- fetch first 1 rows only da yazılabilir.
 
 -- 28. Bilg Müh'e başvuran öğrencilerin ortalama not ortalaması (Yanlış)
-select avg(ort)
+-- Burada ilk önce bilg müh'e başvuran öğrencileri buluyoruz, sonra da bu öğrencilerin ortalamalarını alıyoruz,
+-- ancak bir öğrenci birden fazla başvuru yapmış olabilir, bu yüzden aynı öğrenci birden fazla kez bulunabilir ve
+-- ortalamayı yanlış hesaplayabiliriz.
+select *
 from ogrenciler natural join basvurular
 where ana_dal = 'Bilg. Müh.'; --Birden fazla öğrenci bilg müh'e başvurduysa 2 kere bulunacağı için
 
 -- 29. Bilg Müh'e başvuran öğrencilerin not ortalaması (Doğru)
-select avg(ort)
+-- Burda id'leri alıyor aynı öğrencilerin birden fazla başvuru yapmış olması sorun olmaz
+-- çünkü aynı id'ler tekrar tekrar bulunmaz ve ortalamayı doğru hesaplayabiliriz.
+select *
 from ogrenciler
 where ogr_id in (select ogr_id from basvurular where ana_dal = 'Bilg. Müh.'); -- Bilgisayar mühendisliğine başvurmuş olanları alıyor
 
